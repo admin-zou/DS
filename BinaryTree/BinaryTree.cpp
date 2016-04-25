@@ -37,5 +37,6 @@ int main()
 	T.DPostOrder();
 	T.size();
 	T.Deep();
+	
 	return 0;
 }
