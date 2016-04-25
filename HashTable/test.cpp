@@ -7,5 +7,6 @@ int main()
 	//test2();
 	//HASH_CLOSE::test1();
 	HASH_OPEN::test3();
+	
 	return 0;
 }
