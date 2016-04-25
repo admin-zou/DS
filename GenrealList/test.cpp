@@ -19,5 +19,6 @@ int main()
 	gl1.Length();
 	gl2.Length();
 	gl3.Length();
+	
 	return 0;
 }
