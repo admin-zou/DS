@@ -8,17 +8,17 @@ int main()
 	while (select)
 	{
 		cout << "**************************************" << endl;
-		cout << "*            1.ÍÆËãÈÕÆÚ              *" << endl;
-		cout << "*            2.¼ÆËãÈÕÆÚ²î            *" << endl;
-		cout << "*            0.ÍË³ö                  *" << endl;
+		cout << "*            1.æŽ¨ç®—æ—¥æœŸ              *" << endl;
+		cout << "*            2.è®¡ç®—æ—¥æœŸå·®            *" << endl;
+		cout << "*            0.é€€å‡º                  *" << endl;
 		cout << "**************************************" << endl;
-		cout << "ÇëÊäÈë:";
+		cout << "è¯·è¾“å…¥:";
 		cin >> select;
 		if (select == 0)
 		{}
 		if (select == 1)
 		{
-			cout << "ÇëÊäÈëÈÕÆÚºÍÌìÊý:";
+			cout << "è¯·è¾“å…¥æ—¥æœŸå’Œå¤©æ•°:";
 			Date d1;
 			int days;
 			cin >> d1;
@@ -27,7 +27,7 @@ int main()
 		}
 		else if (select == 2)
 		{
-			cout << "ÇëÊäÈëÁ½¸öÈÕÆÚ:"<<endl;
+			cout << "è¯·è¾“å…¥ä¸¤ä¸ªæ—¥æœŸ:"<<endl;
 			Date d1;
 			Date d2;
 			cin >> d1;
@@ -35,5 +35,6 @@ int main()
 			cout << d1 - d2;
 		}
 	}
+	
 	return 0;
 }
