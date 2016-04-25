@@ -3,19 +3,19 @@
 int main()
 {
 	int arr[10] = { 8, 6, 4, 9, 2, 20, 3, 5, 7, 14 };
-	//堆
+	//露脩
 	/*Heap<int> heap(arr,10);
 	heap.Insert(1);
 	heap.RemoveHeapTop();*/
 
 
-	//优先队列
+	//脫脜脧脠露脫脕脨
 	/*PriorityQueue<int> pque(arr, 10);
 	pque.Push(1);
 	pque.Pop();
 	pque.Makeempty();*/
 
-	//堆排序
+	//露脩脜脜脨貌
 	//MinHeap<int> mh(arr, 10);
 	//mh.HeapSort();
 	//mh.Print();
@@ -34,7 +34,7 @@ int main()
 	HeapSort::MinHeap<int> myhp0(arr,10);
 	myhp0.Insert(1);
 	myhp0.Print();
-	HeapSort::MinHeap<int> mymp(10); //命名空间
+	HeapSort::MinHeap<int> mymp(10); //脙眉脙没驴脮录盲
 	mymp.FindNMaxNum(arry, 100);
  
 	FUNC::MinHeap<int, FUNC::LESS<int> > myhp1(arr, 10);
@@ -47,5 +47,6 @@ int main()
 
 	FUNC::MinHeap<int, FUNC::BIG<int> >myhp4(10);
 	myhp4.FindNMaxNum(arry,100);
+	
 	return 0;
 }
