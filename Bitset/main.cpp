@@ -4,5 +4,6 @@
 int main()
 {
 	Bitset bt(100);
+	
 	return 0;
 }
