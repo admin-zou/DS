@@ -1,17 +1,17 @@
 #pragma once
 #include <iostream>
-#include <vector> //vector²»ÄÜ°üº¬ÔÚÃüÃû¿Õ¼äÄÚ£¬ÓÃÓÚ¿ªÉ¢ÁĞ
+#include <vector> //vectorä¸èƒ½åŒ…å«åœ¨å‘½åç©ºé—´å†…ï¼Œç”¨äºå¼€æ•£åˆ—
 #include <assert.h>
 using namespace std;
 
-namespace HASH_CLOSE //±ÕÉ¢ÁĞ
+namespace HASH_CLOSE //é—­æ•£åˆ—
 {
 
 enum Status{EMPTY,EXIST,DELETE};
 
 template<class T>
 class Hashtable
-{//¿¼ÂÇ¸ººÉÒò×Ó
+{//è€ƒè™‘è´Ÿè·å› å­
 public:
 	Hashtable(size_t capacity) :_capacity(capacity), _size(0)
 	{
@@ -30,7 +30,7 @@ public:
 	{
 		return _size > _capacity;
 	}
-	bool IsSmall() //¿¼ÂÇ¸ººÉÒò×Ó 0.8
+	bool IsSmall() //è€ƒè™‘è´Ÿè·å› å­ 0.8
 	{
 		return ((double)_size / (double)_capacity) >= 0.8;
 	}
@@ -62,19 +62,19 @@ public:
 		return true;
 	}
 	
-	bool Insert(T data)//ÅĞ¶Ï¸ººÉÒò×ÓĞèÒªÀ©Èİ£¬ÏàÓ¦Î»ÖÃÒª¶ÔÓ¦µ½À©ÈİºóµÄÏàÓ¦Î»ÖÃ
+	bool Insert(T data)//åˆ¤æ–­è´Ÿè·å› å­éœ€è¦æ‰©å®¹ï¼Œç›¸åº”ä½ç½®è¦å¯¹åº”åˆ°æ‰©å®¹åçš„ç›¸åº”ä½ç½®
 	{
 		if (Full())
 		{
 			return false;
 		}
-		if (IsSmall())  // ÈİÁ¿Ì«Ğ¡
+		if (IsSmall())  // å®¹é‡å¤ªå°
 		{
-			InCapacity();//À©Èİ²¢Ôö¼Ó
+			InCapacity();//æ‰©å®¹å¹¶å¢åŠ 
 		}
 		int pos = data % _capacity;
-		pos = HashFunc1(pos,_capacity,_status);  //Ò»´ÎÌ½²â
-		//pos = HashFunc2(pos, _capacity,_status);	  //¶ş´ÎÌ½²â
+		pos = HashFunc1(pos,_capacity,_status);  //ä¸€æ¬¡æ¢æµ‹
+		//pos = HashFunc2(pos, _capacity,_status);	  //äºŒæ¬¡æ¢æµ‹
 		_table[pos] = data;
 		_status[pos] = EXIST;
 		_size++;
@@ -116,7 +116,7 @@ public:
 		}
 		return false;
 	}
-	size_t HashFunc1(int pos,int capacity,Status*& status)//Ò»´ÎÌ½²â
+	size_t HashFunc1(int pos,int capacity,Status*& status)//ä¸€æ¬¡æ¢æµ‹
 	{
 		while (status[pos] == EXIST)
 		{
@@ -128,7 +128,7 @@ public:
 		}
 		return pos;
 	}
-	size_t HashFunc2(int pos, int capacity,Status*& status)//¶ş´ÎÌ½²â,²éÕÒµÄÊ±ºòÒ²Òª°´ÕÕ¹«Ê½
+	size_t HashFunc2(int pos, int capacity,Status*& status)//äºŒæ¬¡æ¢æµ‹,æŸ¥æ‰¾çš„æ—¶å€™ä¹Ÿè¦æŒ‰ç…§å…¬å¼
 	{
 		int i = 1;
 		int _pos = pos;
@@ -141,7 +141,7 @@ public:
 	}
 private:
 	T*		_table; //
-	Status* _status; //±êÖ¾¸ÃÎ»ÖÃÊÇ·ñÒÑ´æ·ÅÊı¾İ
+	Status* _status; //æ ‡å¿—è¯¥ä½ç½®æ˜¯å¦å·²å­˜æ”¾æ•°æ®
 	size_t  _size;
 	size_t  _capacity;
 };
@@ -177,7 +177,226 @@ void test2()
 
 }
 
-namespace HASH_OPEN //±ÕÉ¢ÁĞ£¬¹şÏ£±í
+
+
+namespace HASH_KV_Vocabulary  //å­—å…¸
+{
+	enum Status
+	{
+		EXIST,
+		EMPTY,
+		DELETE		
+	};
+
+	template<class K,class V>
+	struct KVNode
+	{
+		K _key;
+		V _val;
+		
+		KVNode(const K &key = K(), const V &val = V()) :
+			_key(key),
+			_val(val)
+		{}
+	};
+
+
+	class HashFuncer
+	{
+	public:
+		size_t operator() (const string &s)
+		{
+			size_t pos = 0;
+			int len = s.size();
+			for (int i = 0; i < len;++i)
+			{
+				pos = pos * 131 + (unsigned char)s[i];
+			}
+			return pos&(0x7FFFFFFF);
+		}
+	};
+
+
+	template<class K, class V,class HashFunc=HashFuncer>
+	class HashTable
+	{
+		typedef KVNode<K, V> Node;
+	public:
+		HashTable(size_t sz):
+			_table(new Node[sz]),
+			_status(new Status[sz]), 
+			_size(0),
+			_capacity(sz)
+		{
+			memset(_status, 1, sizeof(Status)*sz);
+		}
+
+		~HashTable()
+		{
+			if (this->_status)
+			{
+				delete[] this->_status;
+				delete[] this->_table;
+			}
+			_size = 0;
+			_capacity = 0;
+		}
+
+		bool Insert(const K & key,const V & val)
+		{
+			_checkcapacity();
+			//1.ä¸€æ¬¡æ¢æµ‹æ³•(è´Ÿè½½å› å­å¯æ§åˆ¶åœ¨0.7å·¦å³)
+			/*int index = HashPos(key);
+			while (_status[index] == EXIST)
+			{
+				if (_table[index]._key == key)
+				{
+					return false;
+				}
+				++index;
+				if (index == _capacity )
+				{
+					index = 0;
+				}				
+			}*/
+			
+			//2.äºŒæ¬¡æ¢æµ‹æ³•(è´Ÿè½½å› å­å¿…é¡»å°ç‚¹ï¼Œ0.5å·¦å³å§)
+			size_t index = HashPos0(key);
+			size_t pos0 = index;
+			size_t i = 1;
+			while (_status[index] == EXIST)
+			{
+				++i;
+				index = HashPosi(pos0, i);
+			}
+
+			_table[index]._key = key;
+			_table[index]._val = val;
+			_status[index] = EXIST;
+			++_size;
+			return true;
+		}
+		
+		bool Erase(const K &key)
+		{
+			int index = Find(key);
+			if (index != -1)
+			{
+				--_size;
+				_status[index] == DELETE;
+				return true;
+			}
+			return false;
+		}
+
+		int Find(const K &key)
+		{
+			int pos = -1;
+			for (int i = 0; i < _capacity; ++i)
+			{
+				if (_status[i] == EXIST && _table[i]._key == kv)
+				{
+					pos = i;
+					break;
+				}
+			}
+			return pos;
+		}
+
+		void PrintHash()
+		{
+			for (size_t i = 0; i < _capacity; ++i)
+			{
+				cout << i<<": ";
+				if (_status[i] == EXIST)
+				{
+					//cout << _table[i]._key.c_str() << _table[i]._val.c_str();
+					printf("[%s -- %s]", _table[i]._key.c_str(), _table[i]._val.c_str());
+				}
+				cout << endl;
+			}
+		}
+	protected:
+		size_t HashPos(const K &key)
+		{//ä¸€æ¬¡æ¢æµ‹
+			//return kv->_key / _capacity;
+			/*HashFuncer h;
+			return h(key) % _capacity;*/
+			return HashFuncer()(key) % _capacity;
+		}
+
+		size_t HashPos0(const K&key)
+		{//äºŒæ¬¡æ¢æµ‹
+			return HashFuncer()(key) % _capacity;
+		}
+		size_t HashPosi(size_t pos0,size_t i)
+		{//äºŒæ¬¡æ¢æµ‹
+			size_t pos = pos0;
+			for (size_t index = 1; index < i; ++index)
+			{
+				pos += 2 * i - 1;
+			}
+			return pos;
+		}
+
+		void _checkcapacity()
+		{
+			if (_size * 10 >= _capacity * 7)
+			{
+				HashTable<K, V, HashFunc> tmp(2 * _capacity);
+				for (size_t i = 0; i < _capacity; ++i)
+				{
+					if (_status[i] == EXIST)
+					{
+						size_t pos = tmp.HashPos(_table[i]._key);
+						while (tmp._status[pos] == EXIST)
+						{
+							++pos;
+							if (pos == tmp._capacity)
+							{
+								pos = 0;
+							}
+						}
+						tmp._table[pos] = _table[i];
+						tmp._status[pos] = EXIST;
+					}
+				}
+				Swap(tmp);
+			}
+		}
+
+		void Swap(HashTable<K, V, HashFunc>& tmp)
+		{
+			swap(_table, tmp._table);
+			swap(_status,tmp._status);
+			swap(_capacity, tmp._capacity);
+		}
+
+	private:
+		Node    *_table;
+		Status  *_status;
+		size_t  _size;
+		size_t  _capacity;
+	};
+
+	void Test()
+	{
+		HashTable<string, string> KV(10);
+		KV.Insert("petter","å¼ è€å¸ˆ");
+		KV.Insert("Adam", "æ¬§å§†");
+		KV.Insert("Lisa", "æè");
+		KV.Insert("Bart", "å·´å°”");
+		KV.Insert("Jack", "æ°å…‹");
+		KV.Insert("Jhon", "çº¦ç¿°");
+		KV.Insert("Mack", "è¿ˆå…‹å°”");
+		KV.Insert("Tom", "æ±¤å§†çŒ«");
+		KV.PrintHash();
+	}
+}
+
+
+
+namespace HASH_OPEN //å¼€æ•£åˆ—(å“ˆå¸Œæ¡¶)ï¼Œå“ˆå¸Œè¡¨
 {
 
 template<class K,class T>
@@ -191,109 +410,207 @@ struct HashTableNode
 };
 
 const int HashSize = 28;
-static const unsigned long HashArray[HashSize] = {15ul,25ul,53ul,97ul,193ul};
+static const unsigned long HashArray[HashSize] = 
+	{ 
+	53ul, 97ul, 193ul, 389ul, 769ul,1543ul, 3079ul, 6151ul,
+	12289ul, 24593ul,49157ul, 98317ul, 196613ul, 393241ul,786433ul,
+	1572869ul, 3145739ul, 6291469ul, 12582917ul,25165843ul,50331653ul,
+	100663319ul, 201326611ul, 402653189ul,805306457ul,1610612741ul, 3221225473ul, 
+	4294967291ul 
+	};
 
+template<class K>
+struct HashFuncer
+{
+	size_t operator() (const char* str)
+	{
+		size_t pos = 0;
+		size_t seed = 131; //31 131 1313 13131 131313
+		while (*str != '\0')
+		{
+			pos = pos*seed + (unsigned char)*str++;
+		}
+		return (pos & 0x7FFFFFFF);
+	}
+};
 
-
-template<class K,class T>
+template<class K,class T,class HashFunc=HashFuncer<K> >
 class HashTable
 {
+	typedef HashTableNode<K, T> Node;
 public:
-	typedef HashTableNode<K, T>* Node;
-public:
-	HashTable(int size=5)
+	HashTable()
 	{
-		_table.reserve(size);
+		_size = 0;
+		//_table.reserve(size);
 	}
 
-public:
-	bool Add(K key, T val)
+	HashTable(HashTable<K, T> &Ht)
 	{
-		checkCapacity();
+		size_t vSize = Ht._table.size();
+		_table.resize(vSize);
+		for (size_t i = 0; i < vSize; ++i)
+		{
+			Node *cur = Ht._table[i];
+			while (cur)
+			{
+				Node *pnode = new Node(cur->_key, cur->_val);
+				pnode->_next = _table[i];
+				_table[i] = pnode;
+				cur = cur->_next;
+			}
+		}
+	}
+
+	bool Add(const K &key, const T &val)
+	{
+		_checkCapacity();
 		int pos = HashFuc(key, _table.size());
-		Node tmp = _table[pos];
+		//size_t pos = HashFunc()(key);
+		Node *tmp = _table[pos];
 		while (tmp)
 		{
 			if (val == tmp->_val)
 				return false;
 			tmp = tmp->_next;
 		}
-		Node cur = new HashTableNode<K, T>(key, val);
+		//Node *cur = new HashTableNode<K, T>(key, val);
+		Node *cur = new Node(key, val);
 		cur->_next = _table[pos];
 		_table[pos] = cur;
 		++_size;
 		return true;
 	}
+
 	void Print()
 	{
 		for (size_t i = 0; i < _table.size(); ++i)
 		{
-			Node tmp = _table[i];
+			Node *tmp = _table[i];
 			printf("[Table%d]:",i);
 			while (tmp)
 			{
-				printf("[k:%d ,v:%0.2f]--",tmp->_key,tmp->_val);
+				printf("[%d ,%0.2f]->",tmp->_key,tmp->_val);
 				tmp = tmp->_next;
 			}
 			printf("NULL\n");
 		}
 	}
 
-	K find(K& key)
+	Node *find(const K &key, const T &val)
 	{
-		for (int i = 0; i < _table.size(); i++)
+		size_t index = HashFuc(key, _table.size());
+		Node *cur = _table[index];
+		while (cur)
 		{
-			if (NULL != _table[i] && _table[i]->_key == key)
-				return i;
-		}
-		return NULL;
-	}
-protected:
-	void checkCapacity()
-	{
-		if ((double)_size / (double)_table.size() < 0.8)
-		{
-			return;
-		}
-		size_t capacity = GetCapacity(_table.size());
-		vector<Node> table;
-		table.reserve(capacity); //¶¨ÈİÁ¿
-		table.assign(capacity,0);//³õÊ¼»¯
-		
-		//½«Ô­À´µÄÁ´ÉÏµÄÊı¾İ×ªÒÆµÄĞÂÁ´
-		for (size_t i = 0; i < _table.size(); i++)
-		{
-			Node cur = _table[i];
-			if (cur)
+			if (cur->_val == val)
 			{
-				int pos = HashFuc(cur->_key, capacity);
-				while (cur)
+				break;
+			}
+			cur = cur->_next;
+		}
+		return cur;
+	}
+
+	bool Remove(const K &key, const T &val)
+	{
+		size_t index = HashFuc(key, _table.size());
+		Node *cur = _table[index];
+		Node *prev = NULL;
+		if (cur == NULL)
+		{//ç©º
+			return true;
+		}
+
+		while (cur)
+		{
+			if (cur->_val == val)
+			{
+				break;
+			}
+			prev = cur;
+			cur = cur->_next;
+		}
+
+		if (cur == NULL)
+		{//ä¸å­˜åœ¨
+			return true;
+		}
+
+		if (prev == NULL)
+		{//å¤´éƒ¨
+			_table[index] = cur->_next;
+		}
+		else if (cur)
+		{//å…¶ä»–æƒ…å†µ
+			prev->_next = cur->_next;
+		}
+
+		delete cur;
+		--_size;
+		
+		return true;
+	}
+
+	~HashTable()
+	{
+		_size = 0;
+	}
+
+protected:
+	
+	void _checkCapacity()
+	{
+		if (_size == _table.size())
+		{
+			size_t capacity = GetCapacity(_table.size());  //è·å–ä¸‹ä¸€ä¸ªæ¯”å½“å‰sizeå¤§çš„ç´ æ•°
+			vector<Node*> table;
+			table.reserve(capacity); //å®šå®¹é‡
+			table.assign(capacity, 0);//åˆå§‹åŒ–
+
+			//å°†åŸæ¥çš„é“¾ä¸Šçš„æ•°æ®è½¬ç§»çš„æ–°é“¾
+			for (size_t i = 0; i < _table.size(); i++)
+			{
+				Node *cur = _table[i];
+				if (cur)
 				{
-					Node tmp = cur;
-					cur = cur->_next;
-					tmp->_next = table[pos];
-					tmp = table[pos];
+					while (cur)
+					{
+						Node *tmp = cur;
+						cur = cur->_next;
+						int pos = HashFuc(tmp->_key, capacity);
+						tmp->_next = table[pos];
+						table[pos] = tmp;
+					}
 				}
 			}
+			swap(_table, table);
 		}
-		swap(_table, table);	
 	}
-	size_t GetCapacity(size_t size) //»ñÈ¡ÈİÁ¿
+
+	size_t GetCapacity(size_t size) //è·å–å®¹é‡
 	{
 		int pos = 0;
 		while (size >= HashArray[pos])
+		{
 			pos++;
+			if (size == HashSize)
+			{
+				return HashArray[HashSize - 1];
+			}
+		}
 		return HashArray[pos];
 	}
+
 	size_t HashFuc(K key,size_t capacity)
 	{
 		return key%capacity;
 	}
-private:
-	vector<Node>  _table;
-	size_t		  _size; //ÓĞĞ§keyÖµ
-};
 
+private:
+	vector<Node*>  _table;
+	size_t		  _size; //æœ‰æ•ˆkeyå€¼
+};
 
 
 void test3()
@@ -301,13 +618,23 @@ void test3()
 	HashTable<int, double> ht;
 	//ht.Add(1, 1.1);
 	//ht.Add(2, 2.2);
-	for (int i = 0; i < 100; i++)
+	/*
+	for (int i = 0; i < 58; i++)
 	{
 		int num = rand();
 		ht.Add(num, num);
 	}
+	*/
+	ht.Add(1, 2);
+	ht.Add(1, 3);
+	ht.Add(1, 4);
+	ht.Add(1, 5);
 	ht.Print();
+	cout<<ht.find(1,2)->_val<<endl;
+	ht.Remove(1, 2);
+	ht.Print();
+	HashTable<int, double> ht2 = ht;
+	ht2.Print();
 }
-
 
 }
